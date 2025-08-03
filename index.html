@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZIKO - Your AI, Your Control</title>
+    <style>
+        :root {
+            --bg: #0f0f11;
+            --fg: #e0e0ff;
+            --accent: #8a2be2;
+            --card: #1a1a2e;
+            --input: #16213e;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+        
+        body {
+            background: var(--bg);
+            color: var(--fg);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            padding: 1.2rem;
+            text-align: center;
+            border-bottom: 1px solid rgba(138, 43, 226, 0.2);
+        }
+        
+        h1 {
+            font-size: 1.8rem;
+            background: linear-gradient(90deg, #8a2be2, #4cc9f0);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 0.5rem;
+        }
+        
+        .tagline {
+            color: #a0a0c0;
+            font-size: 0.9rem;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        .container {
+            flex: 1;
+            max-width: 800px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 1.2rem;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            padding-bottom: 1rem;
+        }
+        
+        .message {
+            max-width: 85%;
+            padding: 1rem;
+            border-radius: 18px;
+            line-height: 1.5;
+        }
+        
+        .user {
+            background: var(--input);
+            align-self: flex-end;
+            border-bottom-right-radius: 5px;
+        }
+        
+        .ai {
+            background: var(--card);
+            align-self: flex-start;
+            border-bottom-left-radius: 5px;
+            border-left: 3px solid var(--accent);
+        }
+        
+        .input-area {
+            display: flex;
+            gap: 0.8rem;
+            padding: 1rem 0;
+        }
+        
+        textarea {
+            flex: 1;
+            background: var(--input);
+            border: 1px solid rgba(138, 43, 226, 0.3);
+            border-radius: 12px;
+            padding: 1rem;
+            color: var(--fg);
+            resize: none;
+            min-height: 50px;
+            max-height: 150px;
+            font-size: 1rem;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(138, 43, 226, 0.2);
+        }
+        
+        button {
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 0 1.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        button:hover {
+            background: #9d4edd;
+            transform: translateY(-1px);
+        }
+        
+        button:disabled {
+            background: #5a189a;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .disclaimer {
+            background: rgba(138, 43, 226, 0.1);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-top: 1rem;
+            font-size: 0.85rem;
+            color: #c5c5ff;
+        }
+        
+        .model-selector {
+            display: flex;
+            gap: 0.5rem;
+            margin: 0.5rem 0;
+        }
+        
+        .model-btn {
+            background: var(--input);
+            border: 1px solid rgba(138, 43, 226, 0.3);
+            color: #a0a0c0;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
+        
+        .model-btn.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: white;
+        }
+        
+        .status {
+            color: #ff6b6b;
+            font-size: 0.8rem;
+            height: 1.2rem;
+            text-align: center;
+            margin-top: 0.3rem;
+        }
+        
+        /* Futuristic terminal effect */
+        @keyframes blink {
+            50% { border-color: transparent; }
+        }
+        .terminal-cursor {
+            display: inline-block;
+            width: 8px;
+            height: 1.2em;
+            background: #4cc9f0;
+            animation: blink 1s infinite;
+            vertical-align: text-bottom;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>ZIKO</h1>
+        <p class="tagline">Transparent AI. Your control. No illusions.</p>
+    </div>
+    
+    <div class="container">
+        <div class="model-selector">
+            <button class="model-btn active" data-model="mistralai/Mistral-7B-Instruct-v0.2">Mistral 7B</button>
+            <button class="model-btn" data-model="meta-llama/Llama-2-7b-chat-hf">Llama 2</button>
+            <button class="model-btn" data-model="google/gemma-7b-it">Gemma 7B</button>
+        </div>
+        
+        <div class="chat-container" id="chat">
+            <div class="message ai">
+                Hello. I'm ZIKO - a transparent AI interface. <br><br>
+                <strong>Important:</strong> I don't run locally on your device (impossible for beginners). I use Hugging Face's secure API. <br><br>
+                You're in control: Choose models above, see what you send. <br><br>
+                <span class="terminal-cursor"></span>
+            </div>
+        </div>
+        
+        <div class="input-area">
+            <textarea 
+                id="user-input" 
+                placeholder="Ask anything... (Be ethical - I filter illegal/harmful requests)" 
+                rows="1"></textarea>
+            <button id="send-btn">Send</button>
+        </div>
+        
+        <div class="status" id="status"></div>
+        
+        <div class="disclaimer">
+            <strong>ZIKO Reality Check:</strong> 
+            True rebellion is demanding ethical AI - not illegal "uncensored" AI. 
+            This demo uses Hugging Face's API (free tier). 
+            <a href="https://huggingface.co/docs/api-inference/detailed_parameters#text-generation-task" style="color:#8a2be2">Models have safety filters</a> - as they should. 
+            This is your FIRST step into real development.
+        </div>
+    </div>
+
+    <script>
+        // CONFIG - YOU ONLY NEED TO CHANGE THIS
+        const HUGGING_FACE_TOKEN = ""; // ← GET FREE TOKEN AT https://huggingface.co/settings/tokens
+        // END CONFIG
+        
+        // DOM Elements
+        const chatContainer = document.getElementById('chat');
+        const userInput = document.getElementById('user-input');
+        const sendButton = document.getElementById('send-btn');
+        const statusEl = document.getElementById('status');
+        const modelButtons = document.querySelectorAll('.model-btn');
+        
+        let currentModel = "mistralai/Mistral-7B-Instruct-v0.2";
+        
+        // Auto-resize textarea
+        userInput.addEventListener('input', () => {
+            userInput.style.height = 'auto';
+            userInput.style.height = `${userInput.scrollHeight}px`;
+        });
+        
+        // Model selection
+        modelButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                modelButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentModel = btn.dataset.model;
+                setStatus(`Using model: ${currentModel.split('/').pop()}`);
+            });
+        });
+        
+        // Send message
+        sendButton.addEventListener('click', sendMessage);
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+        
+        function setStatus(text) {
+            statusEl.textContent = text;
+            setTimeout(() => {
+                if (statusEl.textContent === text) {
+                    statusEl.textContent = '';
+                }
+            }, 3000);
+        }
+        
+        function addMessage(text, isUser) {
+            const msgDiv = document.createElement('div');
+            msgDiv.classList.add('message');
+            msgDiv.classList.add(isUser ? 'user' : 'ai');
+            msgDiv.textContent = text;
+            chatContainer.appendChild(msgDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+            
+            // Add cursor to new AI messages
+            if (!isUser) {
+                const cursor = document.createElement('span');
+                cursor.className = 'terminal-cursor';
+                msgDiv.appendChild(cursor);
+            }
+        }
+        
+        async function sendMessage() {
+            const message = userInput.value.trim();
+            if (!message) return;
+            
+            // Clear input
+            userInput.value = '';
+            userInput.style.height = 'auto';
+            
+            // Add user message
+            addMessage(message, true);
+            
+            // Disable UI
+            sendButton.disabled = true;
+            sendButton.textContent = '...';
+            setStatus('Connecting to AI...');
+            
+            try {
+                // Validate token
+                if (!HUGGING_FACE_TOKEN) {
+                    throw new Error("Set your HUGGING_FACE_TOKEN in the code (see CONFIG section)");
+                }
+                
+                // Prepare payload
+                const payload = {
+                    inputs: message,
+                    parameters: {
+                        max_new_tokens: 512,
+                        temperature: 0.7,
+                        return_full_text: false
+                    }
+                };
+                
+                // Call Hugging Face API
+                const response = await fetch(
+                    `https://api-inference.huggingface.co/models/${currentModel}`,
+                    {
+                        method: "POST",
+                        headers: {
+                            "Authorization": `Bearer ${HUGGING_FACE_TOKEN}`,
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify(payload)
+                    }
+                );
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(`API Error: ${error.error || response.status}`);
+                }
+                
+                const result = await response.json();
+                const aiResponse = result[0].generated_text || "No response generated.";
+                
+                // Add AI response
+                // Remove the cursor animation first
+                const lastMsg = chatContainer.lastElementChild;
+                lastMsg.querySelector('.terminal-cursor')?.remove();
+                lastMsg.textContent = aiResponse;
+                
+            } catch (error) {
+                console.error("AI Error:", error);
+                addMessage(`ERROR: ${error.message}\n\nCheck console (F12) for details.`, false);
+            } finally {
+                sendButton.disabled = false;
+                sendButton.textContent = 'Send';
+            }
+        }
+        
+        // Initial focus
+        setTimeout(() => userInput.focus(), 500);
+    </script>
+</body>
+  </html>
